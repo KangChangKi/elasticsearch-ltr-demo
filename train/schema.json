@@ -1,7 +1,5 @@
-
 {
     "mappings": {
-        "movie": {
             "properties": {
                 "cast": {
                     "properties": {
@@ -33,7 +31,7 @@
                     }
                 },
                 "mlensId": {
-                    "type": "string",
+                    "type": "text",
                     "fielddata": true
                 },
                 "overview": {
@@ -108,7 +106,7 @@
                 }
 
             }
-        }
+
     },
     "settings": {
         "number_of_shards": 1,
@@ -429,7 +427,7 @@
 							"mary steenburgen => mary_steenburgen",
 							"mary steenburgeon => mary_steenburgen",
 							"chris pine => chris_pine",
-							
+
                             "jabba the hut => jabba_the_hutt",
 							"jabba the hutt => jabba_the_hutt",
 							"world war 2 => world_war_2",
@@ -459,7 +457,6 @@
 						"type": "custom",
 						"tokenizer": "standard",
 						"filter": [
-							"standard",
 							"lowercase",
 							"alt_labels"
 						]
@@ -468,7 +465,6 @@
                         "type": "custom",
                         "tokenizer": "standard",
                         "filter": [
-                            "standard",
                             "lowercase",
                             "bigram_filter"
                         ]
@@ -477,7 +473,6 @@
                         "type": "custom",
                         "tokenizer": "standard",
                         "filter": [
-                            "standard",
                             "lowercase",
                             "trigram_filter"
                         ]

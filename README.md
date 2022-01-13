@@ -1,4 +1,47 @@
-# Learning to Rank Demo
+# New documents
+
+To index movie dataset, follow these steps:
+
+1.Download dataset `tmdb`:
+
+```
+cd train
+./prepare.sh
+```
+
+2.Modify the OpenSearch host's URI:
+
+```
+code indexMlTmdb.py
+```
+
+In the above file, find `macbookair.local` and replace it with proper one.
+
+```
+    es = OpenSearch([{'host': 'macbookair.local', 'port': 9200}],
+    http_auth = ('admin', 'admin'),
+    use_ssl = True,
+    verify_certs = False,
+    timeout=30)
+```
+
+3.Install `opensearch-py` package and start indexing by running `indexMlTmdb.py`
+
+```
+#pip install requests parse jinja
+pip install opensearch-py
+
+python indexMlTmdb.py
+```
+
+4.Check index `tmdb` was filled up on OpenSearch Dashboard:
+
+```
+GET /tmdb/_search
+```
+
+# Old documents
+## Learning to Rank Demo
 
 This demo uses data from [TheMovieDB](http://themoviedb.org) (TMDB) to demonstrate using [Ranklib](https://sourceforge.net/p/lemur/wiki/RankLib/) learning to rank models with Elasticsearch.
 
@@ -11,7 +54,7 @@ docker-compose up
 And browse to http://localhost:8000
 
 
-# Install Dependencies and prep data...
+## Install Dependencies and prep data...
 
 This demo requires
 
@@ -22,7 +65,7 @@ This demo requires
 pip3 install requests elasticsearch5 parse jinja
 ```
 
-## Download the TMDB Data & Ranklib Jar
+### Download the TMDB Data & Ranklib Jar
 
 The first time you run this demo, fetch RankyMcRankFace.jar (used to train model) and tmdb.json (the dataset used)
 
@@ -31,7 +74,7 @@ cd train
 ./prepare.sh
 ```
 
-## Start Elasticsearch/install plugin
+### Start Elasticsearch/install plugin
 
 Start a supported version of Elasticsearch and follow the [instructions to install](https://github.com/o19s/elasticsearch-learning-to-rank#installing) the learning to rank plugin.
 
@@ -39,7 +82,7 @@ Start a supported version of Elasticsearch and follow the [instructions to insta
 docker run -d -p 9201:9200 -p 9301:9300 -e "discovery.type=single-node" --name elasticsearch5 elasticsearch:5.6.4
 ```
 
-## Index to Elasticsearch
+### Index to Elasticsearch
 
 This script will create a 'tmdb' index with default/simple mappings. You can edit this file to play with mappings.
 
@@ -47,7 +90,7 @@ This script will create a 'tmdb' index with default/simple mappings. You can edi
 python indexMlTmdb.py
 ```
 
-# Onto the machine learning...
+## Onto the machine learning...
 
 ## TLDR
 
@@ -67,7 +110,7 @@ and search results can be printed to the console.
 
 More on how all this actually works below:
 
-## Create and upload features (loadFeatures.py)
+### Create and upload features (loadFeatures.py)
 
 A "feature" in ES LTR corresponds to an Elasticsearch query. The score yielded by the query is used to train and evaluate the model. For example, if you feel that a TF\*IDF title score corresponds to higher relevance, then that's a feature you'd want to train on! Other features might include how old a movie is, the number of keywords in a query, or whatever else you suspect might correlate to your user's sense of relevance.
 
@@ -77,7 +120,7 @@ In the demo features 1...n json are mustache templates that correspond to the fe
 
 For traditional Ranklib models, the ordinal is the only way features are identified. Other models use feature *names* which make developing, logging, and managing features more maintainable.
 
-## Gather Judgments (movie_judgments.txt)
+### Gather Judgments (movie_judgments.txt)
 
 The first part of the training data is the *judgment list*. We've provided one in [movie_judgments.txt](movie_judgments.txt).
 
@@ -99,7 +142,7 @@ Quality comes in the form of *grades*. For example if movie "First Blood" is con
 
 You'll notice we bastardize this syntax to add comments identifying the keywords associated with each query id, and append metadata to each line. Code provided in [judgments.py](judgments.py) handles this syntax.
 
-## Log features (collectFeatures.py)
+### Log features (collectFeatures.py)
 
 You saw above how we created features, the next step is to log features for each judgment 3-tuple. This code is in [collectFeatures.py](collectFeatures.py). Logging features can be done in several different contexts. Of course, in a production system, you may wish to log features as users search. In other contexts, you may have a hand-created judgment list (as we do) and wish to simply ask Elasticsearch Learning to Rank for feature values for query/document pairs.
 
@@ -113,11 +156,11 @@ Once features are gathered, the judgment list is fleshed out with feature value,
 4	qid:1	1:12.318446	2:9.8376875 # 7555	rambo
 ```
 
-## Train (train.py and RankLib.jar)
+### Train (train.py and RankLib.jar)
 
 With training data in place, it's time to ask RankLib to train a model, and output to a test file. RankLib supports linear models, ListNet, and several tree-based models such as LambdaMART. In [train.py](train.py) you'll notice how RankLib is called with command line arguments. Models `test_N` are created in our feature store for each type of RankLib model. In the `saveModel` function, you can see how the model is uploaded to our "movie_features" feature set.
 
-## Search using the model (search.py)
+### Search using the model (search.py)
 
 See what sort of search results you get! In `search.py` you'll see we execute the `sltr` query referring to a `test_N` model in the rescore phase. By default `test_6` is used (corresponding to LambdaMART), but you can change the used model at the command line.
 
@@ -133,7 +176,7 @@ Try a different model:
 python search.py rambo test_8
 ```
 
-## Run the HTTP demo
+### Run the HTTP demo
 
 In the /app directory, to run the search page so you can poke and prod run:
 
