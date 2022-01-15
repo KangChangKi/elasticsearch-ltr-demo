@@ -36,13 +36,15 @@ def reindex(es, movieDict={}, index='tmdb'):
 
 if __name__ == "__main__":
     import configparser
+    from sys import argv
     from opensearchpy import OpenSearch
 
-    es = OpenSearch([{'host': 'macbookair.local', 'port': 9200}],
-    http_auth = ('admin', 'admin'),
-    use_ssl = True,
-    verify_certs = False,
-    timeout=30)
+    config = configparser.ConfigParser()
+    config.read('settings.cfg')
+    esUrl=config['DEFAULT']['ESHost']
+    if len(argv) > 1:
+        esUrl = argv[1]
+    es = OpenSearch(esUrl, timeout=30)
 
     movieDict = json.loads(open('tmdb.json').read())
     reindex(es, movieDict=movieDict)
